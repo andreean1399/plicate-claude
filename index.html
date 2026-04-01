@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recepție Hotel Sinaia — Manager Check-in</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1b2a; color: #1a1a2e; min-height: 100vh; }
+
+  /* HERO HEADER cu Castelul Peles */
+  .hero {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Castelul_Peles%2C_Sinaia_-_Vedere_panoramica.jpg/1280px-Castelul_Peles%2C_Sinaia_-_Vedere_panoramica.jpg');
+    background-size: cover;
+    background-position: center 30%;
+    filter: brightness(0.55);
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(10,25,60,0.45) 0%, rgba(10,25,60,0.75) 100%);
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    height: 100%; display: flex; flex-direction: column;
+    justify-content: center; padding: 0 28px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 99px; padding: 4px 14px;
+    font-size: 11px; color: rgba(255,255,255,0.9);
+    font-weight: 600; letter-spacing: 0.05em;
+    margin-bottom: 10px; width: fit-content;
+  }
+  .hero-title {
+    font-size: 22px; font-weight: 700; color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    letter-spacing: 0.01em;
+  }
+  .hero-sub {
+    font-size: 13px; color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+  }
+  .hero-date {
+    position: absolute; right: 24px; bottom: 18px;
+    font-size: 12px; color: rgba(255,255,255,0.65);
+    text-align: right; z-index: 2;
+  }
+
+  /* BACKGROUND PAGE cu peisaj Sinaia */
+  .page-bg {
+    position: fixed; inset: 0; z-index: -2;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Sinaia_-_vedere_de_ansamblu.jpg/1280px-Sinaia_-_vedere_de_ansamblu.jpg');
+    background-size: cover; background-position: center;
+    filter: brightness(0.3) blur(2px);
+  }
+  .page-overlay {
+    position: fixed; inset: 0; z-index: -1;
+    background: rgba(8, 18, 40, 0.82);
+  }
+
+  /* SCENERY STRIP - poze mici Sinaia */
+  .scenery-strip {
+    display: flex; gap: 0; height: 70px; overflow: hidden;
+  }
+  .scenery-img {
+    flex: 1; background-size: cover; background-position: center;
+    filter: brightness(0.65) saturate(1.2);
+    position: relative;
+  }
+  .scenery-img::after {
+    content: attr(data-label);
+    position: absolute; bottom: 6px; left: 8px;
+    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.85);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.04em;
+  }
+
+  .container { max-width: 880px; margin: 0 auto; padding: 1.2rem 1rem 2rem; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 1.4rem; }
+  .tab {
+    flex: 1; padding: 11px 10px; font-size: 13px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+    background: rgba(255,255,255,0.07); backdrop-filter: blur(10px);
+    color: rgba(255,255,255,0.65); font-weight: 500;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .tab:hover { background: rgba(255,255,255,0.14); color: #fff; }
+  .tab.active {
+    background: linear-gradient(135deg, #1a56db, #7c3aed);
+    color: #fff; border-color: transparent;
+    box-shadow: 0 4px 16px rgba(26,86,219,0.4);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: rgba(255,255,255,0.93);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 16px; padding: 1.4rem; margin-bottom: 1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  }
+  .card-accent-blue { border-top: 4px solid #1a56db; }
+  .card-accent-purple { border-top: 4px solid #7c3aed; }
+  .card-accent-gold { border-top: 4px solid #d4a017; }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pill {
+    display: inline-block; padding: 2px 10px; border-radius: 99px;
+    font-size: 10px; font-weight: 700;
+  }
+  .pill-blue { background: #dbeafe; color: #1e40af; }
+  .pill-purple { background: #ede9fe; color: #6d28d9; }
+  .pill-gold { background: #fef3c7; color: #92400e; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
+  input, select {
+    font-size: 14px; padding: 9px 12px;
+    border: 1.5px solid #e5e7eb; border-radius: 9px;
+    background: #f9fafb; color: #111827; width: 100%;
+    transition: all 0.2s;
+  }
+  input:focus, select:focus {
+    outline: none; border-color: #1a56db;
+    background: #fff; box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+  }
+
+  .btn {
+    padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+    color: rgba(255,255,255,0.85);
+  }
+  .btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  .btn.primary {
+    background: linear-gradient(135deg, #1a56db, #7c3aed);
+    color: #fff; border-color: transparent;
+    box-shadow: 0 4px 14px rgba(26,86,219,0.4);
+  }
+  .btn.primary:hover { opacity: 0.9; }
+  .btn.secondary { background: rgba(26,86,219,0.2); color: #93c5fd; border-color: rgba(26,86,219,0.3); }
+  .btn.secondary:hover { background: rgba(26,86,219,0.35); color: #fff; }
+  .btn.danger { color: #fca5a5; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.1); }
+  .btn.danger:hover { background: rgba(239,68,68,0.25); color: #fff; }
+
+  .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1rem; flex-wrap: wrap; }
+
+  .search-bar { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .search-bar input { flex: 1; background: rgba(255,255,255,0.93); border-color: rgba(255,255,255,0.3); color: #111; }
+
+  .client-list { display: flex; flex-direction: column; gap: 10px; }
+  .client-row {
+    background: rgba(255,255,255,0.9); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.4); border-radius: 14px;
+    padding: 13px 16px; display: flex; align-items: center; gap: 14px;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    color: #111827;
+  }
+  .client-row:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); border-color: #1a56db; }
+
+  .avatar {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+  }
+  .av-blue { background: linear-gradient(135deg, #1a56db, #60a5fa); color: #fff; }
+  .av-purple { background: linear-gradient(135deg, #7c3aed, #c084fc); color: #fff; }
+  .av-gold { background: linear-gradient(135deg, #d4a017, #f59e0b); color: #fff; }
+  .av-teal { background: linear-gradient(135deg, #0d9488, #34d399); color: #fff; }
+
+  .client-info { flex: 1; }
+  .client-name { font-size: 14px; font-weight: 600; color: #111827; }
+  .client-meta { font-size: 12px; color: #6b7280; margin-top: 3px; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-purple { background: #ede9fe; color: #6d28d9; }
+  .badge-gold { background: #fef3c7; color: #92400e; }
+  .badge-teal { background: #d1fae5; color: #065f46; }
+
+  .info-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #9ca3af; font-size: 12px; }
+  .info-val { font-weight: 500; color: #111827; }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.2rem; }
+  .stat {
+    border-radius: 16px; padding: 1.2rem 1.3rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .stat::before {
+    content: ''; position: absolute; top: -20px; right: -20px;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .stat-blue { background: linear-gradient(135deg, #1a56db, #3b82f6); }
+  .stat-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+  .stat-gold { background: linear-gradient(135deg, #b45309, #f59e0b); }
+  .stat-num { font-size: 30px; font-weight: 700; }
+  .stat-label { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+
+  /* Card dashboard cu fundal Peles mic */
+  .peles-card {
+    position: relative; overflow: hidden;
+    border-radius: 16px; margin-bottom: 1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+  .peles-card-bg {
+    position: absolute; inset: 0;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Castelul_Peles%2C_Sinaia_-_Vedere_panoramica.jpg/1280px-Castelul_Peles%2C_Sinaia_-_Vedere_panoramica.jpg');
+    background-size: cover; background-position: center 40%;
+    filter: brightness(0.25);
+  }
+  .peles-card-content {
+    position: relative; z-index: 2;
+    background: rgba(10,20,50,0.6); backdrop-filter: blur(4px);
+    padding: 1.4rem; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+  }
+  .peles-card .section-label { color: #fbbf24; }
+
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 500;
+    opacity: 0; transition: opacity 0.3s; z-index: 200; pointer-events: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+  }
+  .toast.show { opacity: 1; }
+  .toast.ok { background: linear-gradient(135deg, #059669, #10b981); color: #fff; }
+  .toast.err { background: linear-gradient(135deg, #dc2626, #ef4444); color: #fff; }
+
+  .empty { text-align: center; padding: 2.5rem; color: rgba(255,255,255,0.4); font-size: 14px; }
+
+  .modal-bg {
+    position: fixed; top:0; left:0; right:0; bottom:0;
+    background: rgba(5,10,30,0.75); display: flex;
+    align-items: center; justify-content: center; z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+  .modal {
+    background: #fff; border-radius: 18px;
+    border: 1px solid #e5e7eb; padding: 1.6rem;
+    min-width: 320px; max-width: 440px; width: 90%;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+  }
+  .modal-header { display: flex; align-items: center; gap: 14px; margin-bottom: 1.2rem; }
+  .modal-avatar {
+    width: 54px; height: 54px; border-radius: 14px;
+    background: linear-gradient(135deg, #1a56db, #7c3aed);
+    color: #fff; display: flex; align-items: center;
+    justify-content: center; font-size: 18px; font-weight: 700; flex-shrink: 0;
+  }
+
+  /* Info text pe card-uri albe */
+  .card .section-label.blue { color: #1a56db; }
+  .card .section-label.purple { color: #7c3aed; }
+
+  @media (max-width: 600px) {
+    .hero { height: 160px; }
+    .hero-title { font-size: 17px; }
+    .scenery-strip { height: 50px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.three { grid-template-columns: 1fr 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stats .stat:last-child { grid-column: 1 / -1; }
+    .tab span.tab-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-bg"></div>
+<div class="page-overlay"></div>
+
+<!-- HERO cu Castelul Peles -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      SINAIA, JUDEȚUL PRAHOVA
+    </div>
+    <div class="hero-title">🏰 Manager Recepție Hotel ★★★★</div>
+    <div class="hero-sub">Sistem înregistrare clienți · Sinaia</div>
+  </div>
+  <div class="hero-date" id="data_header"></div>
+</div>
+
+<!-- STRIP poze Sinaia -->
+<div class="scenery-strip">
+  <div class="scenery-img" data-label="Castelul Peleș"
+    style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Castelul_Peles%2C_Sinaia_-_Vedere_panoramica.jpg/640px-Castelul_Peles%2C_Sinaia_-_Vedere_panoramica.jpg')"></div>
+  <div class="scenery-img" data-label="Castelul Pelișor"
+    style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Pelisor_Castle_Sinaia.jpg/640px-Pelisor_Castle_Sinaia.jpg')"></div>
+  <div class="scenery-img" data-label="Mănăstirea Sinaia"
+    style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Manastirea_Sinaia.jpg/640px-Manastirea_Sinaia.jpg')"></div>
+  <div class="scenery-img" data-label="Valea Prahovei"
+    style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Sinaia_-_vedere_de_ansamblu.jpg/640px-Sinaia_-_vedere_de_ansamblu.jpg')"></div>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('checkin', this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+      <span class="tab-label">Check-in nou</span>
+    </button>
+    <button class="tab" onclick="showTab('clienti', this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M19 8v6M22 11h-6"/></svg>
+      <span class="tab-label">Clienți înregistrați</span>
+    </button>
+    <button class="tab" onclick="showTab('dashboard', this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span class="tab-label">Sumar zi</span>
+    </button>
+  </div>
+
+  <!-- CHECK-IN NOU -->
+  <div id="panel-checkin" class="panel active">
+    <div class="card card-accent-blue">
+      <div class="section-label blue">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Date buletin / pașaport
+        <span class="pill pill-blue">obligatoriu</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tip document</label>
+          <select id="tip_doc">
+            <option value="CI">Carte de identitate (CI)</option>
+            <option value="Pașaport">Pașaport</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Serie și număr</label>
+          <input type="text" id="serie_nr" placeholder="ex: AB 123456" oninput="autoFormat(this)" maxlength="12">
+        </div>
+        <div class="form-group">
+          <label>Nume</label>
+          <input type="text" id="nume" placeholder="IONESCU">
+        </div>
+        <div class="form-group">
+          <label>Prenume</label>
+          <input type="text" id="prenume" placeholder="Alexandru">
+        </div>
+        <div class="form-group">
+          <label>CNP</label>
+          <input type="text" id="cnp" placeholder="1900101XXXXXX" maxlength="13" oninput="extractFromCNP(this.value)">
+        </div>
+        <div class="form-group">
+          <label>Data nașterii <span style="font-size:10px;color:#059669;font-weight:600">auto din CNP</span></label>
+          <input type="date" id="data_nasterii">
+        </div>
+        <div class="form-group">
+          <label>Naționalitate</label>
+          <select id="nationalitate" onchange="toggleCetatenie()">
+            <option value="Română">Română</option>
+            <option value="Moldovenească">Moldovenească</option>
+            <option value="Maghiară">Maghiară</option>
+            <option value="Germană">Germană</option>
+            <option value="Franceză">Franceză</option>
+            <option value="Italiană">Italiană</option>
+            <option value="Britanică">Britanică</option>
+            <option value="Americană">Americană</option>
+            <option value="Alta">Altă naționalitate</option>
+          </select>
+        </div>
+        <div class="form-group" id="group_alta" style="display:none;">
+          <label>Specificați naționalitatea</label>
+          <input type="text" id="nationalitate_alta" placeholder="ex: Franceză">
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-accent-purple">
+      <div class="section-label purple">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        Date sejur
+        <span class="pill pill-purple">cameră & perioadă</span>
+      </div>
+      <div class="form-grid three">
+        <div class="form-group">
+          <label>Cameră nr.</label>
+          <input type="text" id="camera" placeholder="101">
+        </div>
+        <div class="form-group">
+          <label>Check-in</label>
+          <input type="date" id="data_ci">
+        </div>
+        <div class="form-group">
+          <label>Check-out</label>
+          <input type="date" id="data_co">
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="resetForm()">✕ Golește</button>
+      <button class="btn secondary" onclick="cautaExistent()">🔍 Caută client existent</button>
+      <button class="btn primary" onclick="salveazaClient()">✓ Salvează client</button>
+    </div>
+  </div>
+
+  <!-- CLIENTI -->
+  <div id="panel-clienti" class="panel">
+    <div class="search-bar">
+      <input type="text" id="search_input" placeholder="🔍  Caută după nume, serie CI, număr cameră..." oninput="cautaClienti(this.value)">
+    </div>
+    <div class="client-list" id="lista_clienti"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="panel-dashboard" class="panel">
+    <div class="stats">
+      <div class="stat stat-blue">
+        <div class="stat-num" id="stat_total">0</div>
+        <div class="stat-label">Clienți înregistrați azi</div>
+      </div>
+      <div class="stat stat-purple">
+        <div class="stat-num" id="stat_camere">0</div>
+        <div class="stat-label">Camere ocupate total</div>
+      </div>
+      <div class="stat stat-gold">
+        <div class="stat-num" id="stat_nopti">—</div>
+        <div class="stat-label">Nopți medii sejur</div>
+      </div>
+    </div>
+
+    <div class="peles-card">
+      <div class="peles-card-bg"></div>
+      <div class="peles-card-content">
+        <div class="section-label" style="color:#fbbf24">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          Clienți înregistrați astăzi
+          <span class="pill" style="background:rgba(251,191,36,0.2);color:#fbbf24">live</span>
+        </div>
+        <div id="lista_azi"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let clienti = JSON.parse(localStorage.getItem('hotel_sinaia_v1') || '[]');
+const avatarClasses = ['av-blue','av-purple','av-gold','av-teal'];
+const badgeClasses = ['badge-blue','badge-purple','badge-gold','badge-teal'];
+
+function init() {
+  const azi = new Date();
+  document.getElementById('data_header').textContent = azi.toLocaleDateString('ro-RO', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  const aziStr = azi.toISOString().split('T')[0];
+  document.getElementById('data_ci').value = aziStr;
+  const co = new Date(azi); co.setDate(co.getDate()+1);
+  document.getElementById('data_co').value = co.toISOString().split('T')[0];
+}
+
+function showTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+  if (tab === 'clienti') cautaClienti('');
+  if (tab === 'dashboard') actualizeazaDashboard();
+}
+
+function autoFormat(el) {
+  if (document.getElementById('tip_doc').value === 'CI') {
+    let v = el.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if (v.length > 2) v = v.slice(0,2) + ' ' + v.slice(2);
+    el.value = v;
+  }
+}
+
+function toggleCetatenie() {
+  document.getElementById('group_alta').style.display =
+    document.getElementById('nationalitate').value === 'Alta' ? 'flex' : 'none';
+}
+
+function extractFromCNP(cnp) {
+  if (cnp.length !== 13 || isNaN(cnp)) return;
+  const s = cnp[0];
+  let an = parseInt(cnp.slice(1,3));
+  const luna = cnp.slice(3,5);
+  const zi = cnp.slice(5,7);
+  if (s==='1'||s==='2') an+=1900;
+  else if (s==='5'||s==='6') an+=2000;
+  else return;
+  document.getElementById('data_nasterii').value = `${an}-${luna}-${zi}`;
+}
+
+function salveazaClient() {
+  const obligatorii = ['serie_nr','nume','prenume','camera','data_ci','data_co'];
+  for (const id of obligatorii) {
+    if (!document.getElementById(id).value.trim()) {
+      toast('Completează toate câmpurile obligatorii!', false); return;
+    }
+  }
+  const nat = document.getElementById('nationalitate').value;
+  const colorIdx = clienti.length % 4;
+  const client = {
+    id: Date.now(), colorIdx,
+    tip_doc: document.getElementById('tip_doc').value,
+    serie_nr: document.getElementById('serie_nr').value.trim().toUpperCase(),
+    nume: document.getElementById('nume').value.trim().toUpperCase(),
+    prenume: document.getElementById('prenume').value.trim(),
+    cnp: document.getElementById('cnp').value.trim(),
+    data_nasterii: document.getElementById('data_nasterii').value,
+    nationalitate: nat === 'Alta' ? document.getElementById('nationalitate_alta').value : nat,
+    camera: document.getElementById('camera').value.trim(),
+    data_ci: document.getElementById('data_ci').value,
+    data_co: document.getElementById('data_co').value,
+    inregistrat: new Date().toISOString()
+  };
+  clienti.push(client);
+  salveaza();
+  toast('✓ Client salvat cu succes!', true);
+  resetForm();
+}
+
+function resetForm() {
+  ['serie_nr','nume','prenume','cnp','data_nasterii','camera','nationalitate_alta'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('tip_doc').value = 'CI';
+  document.getElementById('nationalitate').value = 'Română';
+  document.getElementById('group_alta').style.display = 'none';
+  const azi = new Date().toISOString().split('T')[0];
+  document.getElementById('data_ci').value = azi;
+  const co = new Date(); co.setDate(co.getDate()+1);
+  document.getElementById('data_co').value = co.toISOString().split('T')[0];
+}
+
+function cautaExistent() {
+  document.querySelectorAll('.tab')[1].click();
+  setTimeout(() => document.getElementById('search_input').focus(), 100);
+}
+
+function cautaClienti(q) {
+  const ql = q.toLowerCase();
+  const filtrati = clienti.filter(c =>
+    c.nume.toLowerCase().includes(ql) ||
+    c.prenume.toLowerCase().includes(ql) ||
+    (c.serie_nr||'').toLowerCase().includes(ql) ||
+    (c.camera||'').includes(ql)
+  ).sort((a,b) => b.id - a.id);
+  const container = document.getElementById('lista_clienti');
+  if (filtrati.length === 0) {
+    container.innerHTML = '<div class="empty">Niciun client găsit.</div>'; return;
+  }
+  container.innerHTML = filtrati.map(c => {
+    const nopti = Math.round((new Date(c.data_co)-new Date(c.data_ci))/(864e5));
+    const init = (c.prenume[0]||'')+(c.nume[0]||'');
+    const ci = c.colorIdx||0;
+    return `<div class="client-row" onclick="veziClient(${c.id})">
+      <div class="avatar ${avatarClasses[ci]}">${init}</div>
+      <div class="client-info">
+        <div class="client-name">${c.prenume} ${c.nume}</div>
+        <div class="client-meta">${c.serie_nr} · Camera ${c.camera} · ${c.data_ci} → ${c.data_co}</div>
+      </div>
+      <span class="badge ${badgeClasses[ci]}">${nopti} ${nopti===1?'noapte':'nopți'}</span>
+    </div>`;
+  }).join('');
+}
+
+function veziClient(id) {
+  const c = clienti.find(x => x.id===id); if(!c) return;
+  const nopti = Math.round((new Date(c.data_co)-new Date(c.data_ci))/(864e5));
+  const init = (c.prenume[0]||'')+(c.nume[0]||'');
+  const div = document.createElement('div');
+  div.className = 'modal-bg';
+  div.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-avatar">${init}</div>
+        <div>
+          <div style="font-size:18px;font-weight:700;color:#111827">${c.prenume} ${c.nume}</div>
+          <div style="font-size:13px;color:#6b7280;margin-top:3px">Camera ${c.camera} · ${nopti} ${nopti===1?'noapte':'nopți'}</div>
+        </div>
+      </div>
+      <div style="background:#f9fafb;border-radius:10px;padding:12px 14px;margin-bottom:1rem;">
+        <div class="info-row"><span class="info-label">Tip document</span><span class="info-val">${c.tip_doc}</span></div>
+        <div class="info-row"><span class="info-label">Serie / Nr.</span><span class="info-val">${c.serie_nr}</span></div>
+        ${c.cnp?`<div class="info-row"><span class="info-label">CNP</span><span class="info-val">${c.cnp}</span></div>`:''}
+        ${c.data_nasterii?`<div class="info-row"><span class="info-label">Data nașterii</span><span class="info-val">${c.data_nasterii}</span></div>`:''}
+        <div class="info-row"><span class="info-label">Naționalitate</span><span class="info-val">${c.nationalitate}</span></div>
+        <div class="info-row"><span class="info-label">Check-in</span><span class="info-val">${c.data_ci}</span></div>
+        <div class="info-row"><span class="info-label">Check-out</span><span class="info-val">${c.data_co}</span></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" style="color:#dc2626;border-color:#fecaca;background:#fff5f5" id="btn_sterge">✕ Șterge</button>
+        <button class="btn primary" id="btn_inchide">Închide</button>
+      </div>
+    </div>`;
+  document.body.appendChild(div);
+  div.querySelector('#btn_inchide').onclick = () => div.remove();
+  div.querySelector('#btn_sterge').onclick = () => { stergeClient(id); div.remove(); };
+  div.addEventListener('click', e => { if(e.target===div) div.remove(); });
+}
+
+function stergeClient(id) {
+  clienti = clienti.filter(c => c.id!==id);
+  salveaza();
+  toast('Client șters.', true);
+  cautaClienti(document.getElementById('search_input').value);
+  actualizeazaDashboard();
+}
+
+function actualizeazaDashboard() {
+  const azi = new Date().toISOString().split('T')[0];
+  const clientiAzi = clienti.filter(c => c.inregistrat && c.inregistrat.startsWith(azi));
+  const camere = new Set(clienti.map(c => c.camera)).size;
+  const totalNopti = clienti.reduce((s,c) => s + Math.round((new Date(c.data_co)-new Date(c.data_ci))/(864e5)), 0);
+  const medieNopti = clienti.length > 0 ? (totalNopti/clienti.length).toFixed(1) : '—';
+  document.getElementById('stat_total').textContent = clientiAzi.length;
+  document.getElementById('stat_camere').textContent = camere;
+  document.getElementById('stat_nopti').textContent = medieNopti;
+  const lista = document.getElementById('lista_azi');
+  if (clientiAzi.length === 0) {
+    lista.innerHTML = '<div class="empty" style="color:rgba(255,255,255,0.4)">Niciun client înregistrat astăzi.</div>'; return;
+  }
+  lista.innerHTML = clientiAzi.map((c,i) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08)">
+      <span style="display:flex;align-items:center;gap:10px;color:#fff">
+        <span style="width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff">${c.prenume[0]}${c.nume[0]}</span>
+        <strong>${c.prenume} ${c.nume}</strong>
+      </span>
+      <span style="color:rgba(255,255,255,0.5);font-size:12px">Camera ${c.camera} · ${c.serie_nr}</span>
+    </div>`).join('');
+}
+
+function salveaza() {
+  localStorage.setItem('hotel_sinaia_v1', JSON.stringify(clienti));
+}
+
+function toast(msg, ok) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast '+(ok?'ok':'err');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+init();
+</script>
+</body>
+</html>
