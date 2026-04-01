@@ -1,1 +1,1 @@
-# plicate-claude
+# aplicate-claude
